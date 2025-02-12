@@ -49,14 +49,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="matching_page"
+        name="index"
         options={{
           title: 'Matching Page',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="closet"
+        name="explore"
         options={{
           title: 'My Closet',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
