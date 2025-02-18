@@ -1,15 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native-web';
+import { View, Text, StyleSheet } from 'react-native';
 
-
-const Login = () => {
+export default function Login() {
     return (
-        <View style={header.container}>
+        <View style={styles.container}>
             <Text style={styles.text}>Hello, React Native!</Text>
-            </View>
+        </View>
     );
-};
-
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -20,6 +18,8 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 20,
-        fontWeight: 'bold',
+        //fontWeight: 'bold',
     },
 });
+
+//export default Login; //this is the default export

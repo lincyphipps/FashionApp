@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet} from 'react-native';
 
-const MyScreen = () => {
+export default function MyScreen() {
     return(
         <View style={styles.TitleContainer}>
             <Text style={styles.TitleText}>"Fashion App"</Text>
@@ -21,3 +21,4 @@ const styles = StyleSheet.create({
         fontWeight: 400,
     },
 });
+//export default MyScreen; //this is the default export

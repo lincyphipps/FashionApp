@@ -1,17 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-
-
-const CameraScreen = () => {
+export default function CameraScreen() {
     return (
-        <View style = {StyleSheet.container}>
-            <Text style = {StyleSheet.text}>
-                FashionApp
-            </Text>
+        <View style = {styles.container}>
+            <Text style = {styles.text}>FashionApp</Text>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -26,3 +22,4 @@ const styles = StyleSheet.create({
     },
 });
 
+//export default CameraScreen; //this is the default export

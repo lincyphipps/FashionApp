@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Closet = () => {
+export default function functionCloset() {
     return (
         <View style={styles.titleContainer}>
             <Text style={styles.title}>My Closet</Text>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     titleContainer: {
@@ -21,3 +21,5 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 });
+
+//export default Closet; //this is the default export

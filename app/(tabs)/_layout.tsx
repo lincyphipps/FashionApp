@@ -28,35 +28,35 @@ export default function TabLayout() {
       }}>
 
      <Tabs.Screen
-        name="login"
+        name="Login"
         options={{
           title: 'Login',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="camera"
+        name="CameraScreen"
         options={{
           title: 'Camera',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="main_menu"
+        name="MainMenuScreen"
         options={{
           title: 'Main Menu',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="MatchingPage"
         options={{
           title: 'Matching Page',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="Closet"
         options={{
           title: 'My Closet',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
@@ -64,4 +64,4 @@ export default function TabLayout() {
       />
     </Tabs>
   );
-};
+}
