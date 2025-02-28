@@ -24,8 +24,6 @@ export default function Login() {
                 <Text style={styles.forgotPassword}>Forgot password?</Text>
             </View>
         </View>
-
-
     );
 }
 
