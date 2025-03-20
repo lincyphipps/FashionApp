@@ -11,6 +11,7 @@ export default function functionCloset() {
         setValue(index);
     };
 
+    /* Store the images under each tab */
     const imageData = {
         Recents: [
             require('../../assets/images/react-logo.png'),
@@ -35,6 +36,7 @@ export default function functionCloset() {
         ],
     };
 
+    /* Load image */
     const renderItem = ({item}) => (
         <View style={styles.imageContainer}>
             <Image source={item} style={styles.image} />
@@ -43,13 +45,14 @@ export default function functionCloset() {
 
     return (
         <View style={styles.screen}>
-            <View style={styles.topTitleContainer}>
+            
+            <View style={styles.topTitleContainer}> {/* Title text */}
                 <Text style={styles.topTitleText}>
                     My Closet
                 </Text>
             </View>
 
-            <View style={styles.tabBar}>
+            <View style={styles.tabBar}> {/* Tabs */}
                 {tabs.map((tab, index) => (
                     <TouchableOpacity
                         key={index}
@@ -60,7 +63,8 @@ export default function functionCloset() {
                     </TouchableOpacity>
                 ))}
             </View>
-            <FlatList
+            
+            <FlatList /* Load images for selected tab */
                 data={imageData[tabs[selectedTab]]}
                 renderItem={renderItem}
                 keyExtractor={(item, index) => index.toString()}
