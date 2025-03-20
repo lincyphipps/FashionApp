@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet} from 'react-native';
 
 export default function MyScreen() {
-    return(
+    return (
         <View style={styles.TitleContainer}>
             <Text style={styles.TitleText}>"Fashion App"</Text>
         </View>
