@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, FlatList, Alert, TouchableOpacity, Modal } from "react-native";
+import React, { useState, useEffect} from "react";
+import { View, Text, TextInput, Button, FlatList, Alert, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { addClothingItem, fetchClothingByCategory, deleteClothingItem } from "../../firebase/firebaseService";
 import { getAuth } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
-
 
 const Closet = () => {
     const auth = getAuth();
     const userId = auth.currentUser ? auth.currentUser.uid : null; // Get logged-in user ID
+
+    const tabs = ['Recents', 'Tops', 'Bottoms', 'Accessories'];
+    const [selectedTab, setSelectedTab] = useState(0);
 
     const [category, setCategory] = useState("top");
     const [colors, setColors] = useState("");
@@ -23,6 +24,7 @@ const Closet = () => {
 
         const loadClothing = async () => {
             const items = await fetchClothingByCategory(userId, category);
+            console.log("Fetched clothing:", items);
             setClothing(items);
         };
         loadClothing();
@@ -61,63 +63,65 @@ const Closet = () => {
         setClothing(clothing.filter(item => item.id !== clothingId)); // Update UI
     };
 
-    return (
-        <View style={{ flex: 1, padding: 20 }}>
-            {/* Header with Small "+" Button */}
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text style={{ fontSize: 24, fontWeight: "bold" }}>My Closet</Text>
+    // Render clothing items (use imageUrl from Firebase)
+    const renderItem = ({ item }) => (
+        <View style={styles.imageContainer}>
+            <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            <Text>{item.category.toUpperCase()}</Text>
+            <TouchableOpacity onPress={() => handleDeleteClothing(item.id)} style={styles.deleteButton}>
+                <Ionicons name="trash-outline" size={20} color="red" />
+            </TouchableOpacity>
+        </View>
+    );
 
-                {/* Small "+" Button to Open Modal */}
-                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.plusButton}>
-                    <Ionicons name="add-circle-outline" size={30} color="black" />
-                </TouchableOpacity>
+    return (
+        <View style={styles.screen}>
+            {/* Header */}
+            <View style={styles.topTitleContainer}>
+                <Text style={styles.topTitleText}>My Closet</Text>
             </View>
 
-            {/* Category Selector */}
-            <Text>Select Category:</Text>
-            <Picker selectedValue={category} onValueChange={(itemValue) => setCategory(itemValue)}>
-                <Picker.Item label="Top" value="top" />
-                <Picker.Item label="Bottom" value="bottom" />
-                <Picker.Item label="Shoes" value="shoes" />
-                <Picker.Item label="Accessory" value="accessory" />
-            </Picker>
+            {/* Tab Navigation */}
+            <View style={styles.tabBar}>
+                {tabs.map((tab, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        style={[styles.tabItem, selectedTab === index && styles.activeTab]}
+                        onPress={() => setSelectedTab(index)}
+                    >
+                        <Text style={[styles.tabText, selectedTab === index && styles.activeTabText]}>{tab}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
 
             {/* Clothing List */}
-            <FlatList
-                data={clothing}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={{ padding: 10, borderBottomWidth: 1, borderColor: "#ddd" }}>
-                        <Text>{item.category.toUpperCase()}</Text>
-                        <Text>Colors: {item.colors.join(", ")}</Text>
-                        <Text>Formality: {item.formality}</Text>
-                        <Text>Weather: {item.weather.join(", ")}</Text>
-                        <TouchableOpacity onPress={() => handleDeleteClothing(item.id)} style={styles.deleteButton}>
-                            <Ionicons name="trash-outline" size={20} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
+            {clothing.length > 0 ? (
+                <FlatList
+                    data={clothing}
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => index.toString()}
+                    numColumns={2}
+                    contentContainerStyle={styles.grid}
+                />
+            ) : (
+                <Text style={{ textAlign: "center", marginTop: 20, fontSize: 16, color: "gray" }}>
+                    No clothing found in this category.
+                </Text>
+            )}
+
+            {/* Floating Add Button */}
+            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.plusButton}>
+                <Ionicons name="add-circle-outline" size={50} color="black" />
+            </TouchableOpacity>
 
             {/* Modal for Adding Clothing */}
             <Modal visible={modalVisible} animationType="slide">
-                <View style={styles.modal}>
+            <View style={{ flex: 1, padding: 20, position: "relative" }}>
                     <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>Add Clothing</Text>
 
-                    <Picker selectedValue={category} onValueChange={(itemValue) => setCategory(itemValue)}>
-                        <Picker.Item label="Top" value="top" />
-                        <Picker.Item label="Bottom" value="bottom" />
-                        <Picker.Item label="Shoes" value="shoes" />
-                        <Picker.Item label="Accessory" value="accessory" />
-                    </Picker>
-
                     <TextInput style={styles.input} placeholder="Colors (comma-separated)" value={colors} onChangeText={setColors} />
-                    <Picker selectedValue={formality} onValueChange={(itemValue) => setFormality(itemValue)}>
-                        <Picker.Item label="Casual" value="casual" />
-                        <Picker.Item label="Formal" value="formal" />
-                    </Picker>
                     <TextInput style={styles.input} placeholder="Weather (comma-separated)" value={weather} onChangeText={setWeather} />
-                    <TextInput style={styles.input} placeholder="Image URL (temporary)" value={imageUrl} onChangeText={setImageUrl} />
+                    <TextInput style={styles.input} placeholder="Image URL (Firebase Storage)" value={imageUrl} onChangeText={setImageUrl} />
 
                     <Button title="Add Item" onPress={handleAddClothing} />
                     <Button title="Close" onPress={() => setModalVisible(false)} />
@@ -127,33 +131,21 @@ const Closet = () => {
     );
 }
 
-const styles = {
-    plusButton: {
-        padding: 10,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        padding: 8,
-        marginBottom: 10,
-        borderRadius: 5,
-    },
-    deleteButton: {
-        marginTop: 5,
-    },
-    modal: {
-        position: "absolute",
-        top: 50,
-        left: 20,
-        right: 20,
-        backgroundColor: "white",
-        padding: 20,
-        borderRadius: 10,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-    },
-};
+const styles = StyleSheet.create({
+    screen: { flex: 1, backgroundColor: '#fffcee' },
+    topTitleContainer: { justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
+    topTitleText: { fontSize: 40, fontWeight: 'bold', color: 'black' },
+    tabBar: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 },
+    tabItem: { paddingVertical: 8, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: 'gray' },
+    tabText: { fontSize: 20, color: 'gray' },
+    activeTab: { borderBottomWidth: 2, borderBottomColor: 'black' },
+    activeTabText: { color: 'black', fontWeight: 'bold' },
+    grid: { padding: 10, alignItems: 'center' },
+    imageContainer: { margin: 10, borderRadius: 10, width: 150, height: 150, justifyContent: 'center', alignItems: 'center' },
+    image: { width: 150, height: 150, borderRadius: 10 },
+    plusButton: { position: "absolute", top: 30, right: 20, backgroundColor: "white", borderRadius: 50, padding: 10, elevation: 5 },
+    input: { borderWidth: 1, borderColor: "#ccc", padding: 8, marginBottom: 10, borderRadius: 5, width: "80%" },
+    modal: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white", padding: 20 }
+});
 
 export default Closet;
