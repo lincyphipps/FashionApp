@@ -4,6 +4,10 @@ import { useRouter } from 'expo-router';
 
 export default function Login() {
     const router = useRouter();
+
+    const handleCreateAccount = () => {
+        router.push('/CreateAccount');
+    };
     
     return (
         <View style={styles.main_head}>   {/* title at top*/}
@@ -29,7 +33,7 @@ export default function Login() {
                 </TouchableOpacity>
 
                  {/* Sign Up Button */}
-                 <TouchableOpacity onPress={() => router.push('/CreateAccount')} style={styles.newAccButton}>
+                 <TouchableOpacity onPress={handleCreateAccount} style={styles.newAccButton}>
                     <Text style={styles.newAccButtonText}>New? Create Account</Text>
                 </TouchableOpacity>
 
@@ -66,7 +70,6 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 2,
     },
-
     menu: {
         width: '100%',
         maxWidth: 350,
