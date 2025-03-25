@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, Switch, Button, Image, TouchableOpacity, Modal, FlatList } from "react-native";
-import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
-import { fetchAllClothing, generateMatches } from "../firebase/firebaseService"; 
+import { getStorage, ref, listAll, getDownloadURL } from "../../firebase/storage";
+import { fetchAllClothing, generateMatches } from "../../firebase/firebaseService"; 
 
 const MatchingPage = () => {
   console.log("Matching Page Loaded");
