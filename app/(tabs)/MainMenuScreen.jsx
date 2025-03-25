@@ -37,7 +37,6 @@ export default function MyScreen() {
                 onPress={() => alert("To Closet!")}
                 style = {{top: 560}}
             />
-
         </View>
     )
 }
