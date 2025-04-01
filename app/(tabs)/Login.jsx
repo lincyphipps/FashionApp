@@ -1,7 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function Login() {
+    const router = useRouter();
+
+    const handleCreateAccount = () => {
+        router.push('/CreateAccount');
+    };
+    
     return (
         <View style={styles.main_head}>   {/* title at top*/}
             <View style={styles.header}>
@@ -10,18 +17,26 @@ export default function Login() {
 
             <View style={styles.menu}>  {/*email and password square*/}
                 <Text style={styles.label}>Email</Text>
-                <TextInput style={styles.input} placeholder="Value" placeholderTextColor="#aaa" />
+                <TextInput style={styles.input} placeholder="Enter Your Email" placeholderTextColor="#aaa" />
 
                 <Text style={styles.label}>Password</Text>
-                <TextInput style={styles.input} placeholder="Value" placeholderTextColor="#aaa" secureTextEntry />
+                <TextInput style={styles.input} placeholder="Enter Your Password" placeholderTextColor="#aaa" secureTextEntry />
 
                 {/* Sign In Button */}
-            <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Sign In</Text>
                 </TouchableOpacity>
 
                 {/* Forgot Password Link */}
-                <Text style={styles.forgotPassword}>Forgot password?</Text>
+                <TouchableOpacity style={styles.forgotPassword}>
+                    <Text style={styles.forgotPassword}>Forgot password?</Text>
+                </TouchableOpacity>
+
+                 {/* Sign Up Button */}
+                 <TouchableOpacity onPress={handleCreateAccount} style={styles.newAccButton}>
+                    <Text style={styles.newAccButtonText}>New? Create Account</Text>
+                </TouchableOpacity>
+
             </View>
         </View>
     );
@@ -33,7 +48,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFEF8',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 20
+        padding: 20,
     },
     header: {
         backgroundColor: '#C9A7F5',
@@ -42,7 +57,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         shadowColor: '#000',
         shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.3,
         shadowRadius: 4,
         marginBottom: 40,
     },
@@ -55,7 +70,6 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 2,
     },
-
     menu: {
         width: '100%',
         maxWidth: 350,
@@ -64,7 +78,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.3,
         shadowRadius: 4,
     },
     label: {
@@ -87,7 +101,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 5,
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 10,
     },
     buttonText: {
         color: '#fff',
@@ -98,5 +112,20 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#555',
         textDecorationLine: 'underline',
+        marginBottom: 8,
+    },
+    newAccButton: {
+        backgroundColor: '#fff', // Muted lavender for the button
+        paddingVertical: 10,
+        borderRadius: 5,
+        borderColor: '#A078B6',
+        borderWidth: 1,
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    newAccButtonText: {
+        color: '#A078B6',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
