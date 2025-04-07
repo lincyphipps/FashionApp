@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Switch, Button, Image, TouchableOpacity, Modal, FlatList } from "react-native";
 import { getStorage, ref, listAll, getDownloadURL } from "../../firebase/storage";
 import { fetchAllClothing, generateMatches } from "../../firebase/firebaseService"; 
+import { getAuth } from 'firebase/auth';
 
 const MatchingPage = () => {
   console.log("Matching Page Loaded");
@@ -22,9 +23,16 @@ const MatchingPage = () => {
     setCurrentCategory(category);
     setModalVisible(true);
 
+    const user = auth.currentUser;
+    console.log("🔥 Full current user:", JSON.stringify(user, null, 2));    
+
     const storage = getStorage();
-    const userId = "exampleUserID"; // Replace with actual user ID
-    const storageRef = ref(storage, `users/${userId}/clothing`);
+    const auth = getAuth();
+    
+    const cleanUserId = auth.currentUser?.uid.trim();
+    console.log("✅ Clean user ID:", cleanUserId);
+    const storageRef = ref(storage, `users/${cleanUserId}/clothing`);
+    console.log("🗂 Firebase path:", `users/${cleanUserId}/clothing/${itemId}.jpg`);
 
     try {
       const result = await listAll(storageRef);
@@ -36,7 +44,8 @@ const MatchingPage = () => {
   };
 
   const handleConfirm = async () => {
-    const userId = "exampleUserID"; // fixme TODO: replace with actual auth user ID
+    const auth = getAuth();
+    const cleanUserId = auth.currentUser?.uid;
     const allClothing = await fetchAllClothing(userId);
   
     const matches = generateMatches(allClothing, selectedClothing, accessorySwitchOn);

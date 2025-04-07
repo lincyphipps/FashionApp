@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 const auth = getAuth();
-
+/*
 // function to add clothing items
 export const addClothingItem = async () => {
     const user = auth.currentUser;
@@ -35,6 +35,6 @@ export const getUserClothing = async () => {
     if (!userSnapshot.exists()) return null;
     
     return userSnapshot.data().clothing || {};
-};
+};*/
 
     

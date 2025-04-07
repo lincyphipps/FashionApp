@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
 
 const CreateAccount = () => {
     const [email, setEmail] = useState('');
@@ -8,24 +10,32 @@ const CreateAccount = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const router = useRouter();
 
-    const handleRegister = () => {  // password / field confirmation
-        if(!email || !password || !confirmPassword) {  // if any of these fields are not filled out -> alert
-            Alert.alert('Error', 'All fields are required.');
-            return;
-        }
-        if(password !== confirmPassword) {  // if password and confirmpassword dont match -> alert
-            Alert.alert('Error', 'Passwords do not match.');
-            return;
-        }
-        if(password.length < 8) {
-            Alert.alert('Error', 'Password must be at least 8 characters long.');
-            return;
-        }
-        
-        //registration login
+    const handleRegister = async () => {
+      if (!email || !password || !confirmPassword) {
+        Alert.alert('Error', 'All fields are required.');
+        return;
+      }
+    
+      if (password !== confirmPassword) {
+        Alert.alert('Error', 'Passwords do not match.');
+        return;
+      }
+    
+      if (password.length < 8) {
+        Alert.alert('Error', 'Password must be at least 8 characters long.');
+        return;
+      }
+    
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log("✅ Account created:", userCredential.user);
         Alert.alert('Success', 'Account created successfully!');
-        router.push('/Login');  // redirect to login
-    }
+        router.push('/Login');
+      } catch (error) {
+        console.error("❌ Firebase Error:", error.code, error.message);
+        Alert.alert('Error', error.message);
+      }
+    };    
 
     return (
         <View style={styles.container}>
