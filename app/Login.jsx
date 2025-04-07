@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig';
 import { useRouter } from 'expo-router';
 
 export default function Login() {
     const router = useRouter();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
+
+    const handleLogin = async () => {
+        console.log('Logging in with:', email, password);
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          console.log('Signed in:', userCredential.user);
+          router.replace('/(tabs)/MainMenuScreen');
+        } catch (error) {
+          console.error('Login error:', error.code, error.message);
+          alert('Login failed: ' + error.message);
+          setErrorMsg(error.message);
+        }
+      };          
 
     const handleCreateAccount = () => {
         router.push('/CreateAccount');
@@ -17,13 +36,26 @@ export default function Login() {
 
             <View style={styles.menu}>  {/*email and password square*/}
                 <Text style={styles.label}>Email</Text>
-                <TextInput style={styles.input} placeholder="Enter Your Email" placeholderTextColor="#aaa" />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Your Email"
+                    placeholderTextColor="#aaa"
+                    value={email}
+                    onChangeText={setEmail}
+                    />
 
                 <Text style={styles.label}>Password</Text>
-                <TextInput style={styles.input} placeholder="Enter Your Password" placeholderTextColor="#aaa" secureTextEntry />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Your Password"
+                    placeholderTextColor="#aaa"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                />
 
                 {/* Sign In Button */}
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={handleLogin}>
                     <Text style={styles.buttonText}>Sign In</Text>
                 </TouchableOpacity>
 

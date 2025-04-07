@@ -1,8 +1,10 @@
 import React, { useState, useEffect} from "react";
-import { View, Text, TextInput, Button, FlatList, Alert, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, FlatList, Alert, TouchableOpacity, Modal, StyleSheet, Image } from "react-native";
 import { addClothingItem, fetchClothingByCategory, deleteClothingItem } from "../../firebase/firebaseService";
 import { getAuth } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
+//import { uploadClothingImage } from '../../firebase/storage';
 
 const Closet = () => {
     const auth = getAuth();
@@ -11,45 +13,100 @@ const Closet = () => {
     const tabs = ['Recents', 'Tops', 'Bottoms', 'Accessories'];
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const [category, setCategory] = useState("top");
+    const [category, setCategory] = useState("");
     const [colors, setColors] = useState("");
-    const [formality, setFormality] = useState("casual");
-    const [weather, setWeather] = useState([]);
-    const [imageUrl, setImageUrl] = useState(""); // Temporary (will replace with Firebase Storage later)
+    const [formality, setFormality] = useState("");
+    const [weather, setWeather] = useState("");
     const [clothing, setClothing] = useState([]); // Stores added clothing items
     const [modalVisible, setModalVisible] = useState(false); // Controls modal visibility
+    const [image, setImage] = useState(null);
 
     // 🔹 Fetch Clothing when screen loads or category changes
     useEffect(() => {
-
         const loadClothing = async () => {
-            const items = await fetchClothingByCategory(userId, category);
+            if (!userId) return;
+          
+            let items = [];
+            if (category) {
+              items = await fetchClothingByCategory(userId, category);
+            } else {
+              items = await fetchClothingByCategory(userId, "top"); // or call fetchAllClothing
+            }
+          
             console.log("Fetched clothing:", items);
-            setClothing(items);
-        };
+            setClothing(items || []);
+          };          
         loadClothing();
     }, [category]); // Refetch when category changes
 
     // 🔹 Add Clothing Item
-    const handleAddClothing = async () => {
-        if (!category || !colors || !formality || !weather || !imageUrl) {
-            Alert.alert("Error", "Please fill out all fields.");
-            return;
+    const handleAddClothing = async () => {         
+        if (!category || !colors || !formality || !weather || !image) {
+          Alert.alert("Error", "Please fill out all fields.");
+          return;
         }
-
+      
+        const tempId = Date.now().toString(); // generate a unique ID for image filename
+        console.log("🆔 Generated temp ID:", tempId);
+      
+        const imageUrl = image;
+        console.log("📸 Uploading image URL:", imageUrl);
+        if (!imageUrl) {
+          Alert.alert("Error", "Failed to upload image.");
+          return;
+        }
+        console.log("✅ Proceeding to add clothing item to Firestore");
+      
         const clothingData = {
-            category,
-            colors: colors.split(",").map(c => c.trim()), // Convert to array
-            formality,
-            weather: weather.split(",").map(w => w.trim()), // Convert to array
-            imageUrl,
+          category,
+          colors: colors.split(",").map(c => c.trim()),
+          formality,
+          weather: weather.split(",").map(w => w.trim()),
+          imageUrl, // ✅ From Firebase
         };
-
+      
         await addClothingItem(userId, clothingData);
         Alert.alert("Success", "Clothing item added!");
         setModalVisible(false);
         fetchUpdatedClothing();
-    };
+      
+        // Reset fields (optional)
+        setCategory('');
+        setColors('');
+        setWeather('');
+        setFormality('');
+        setImage(null);
+      };      
+
+    const handlePickImage = async () => {
+        console.log("📸 handlePickImage called");
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          alert('We need access to your photo library!');
+          return;
+        }
+      
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
+        
+            console.log("🧾 Picker result:", result);
+        
+            if (!result.canceled && result.assets?.length > 0) {
+              const uri = result.assets[0].uri;
+              console.log("✅ Image URI:", uri);
+              setImage(uri);
+            } else {
+              console.log("🚫 Picker canceled");
+            }
+          } catch (error) {
+            console.error("❌ Picker error:", error);
+          }
+      };      
 
     // 🔹 Fetch updated clothing after adding new item
     const fetchUpdatedClothing = async () => {
@@ -74,6 +131,11 @@ const Closet = () => {
         </View>
     );
 
+    const closeModal = () => {
+        setImage(null);
+        setModalVisible(false);
+      };
+
     return (
         <View style={styles.screen}>
             {/* Header */}
@@ -95,7 +157,7 @@ const Closet = () => {
             </View>
 
             {/* Clothing List */}
-            {clothing.length > 0 ? (
+            {Array.isArray(clothing) && clothing.length > 0 ? (
                 <FlatList
                     data={clothing}
                     renderItem={renderItem}
@@ -116,15 +178,51 @@ const Closet = () => {
 
             {/* Modal for Adding Clothing */}
             <Modal visible={modalVisible} animationType="slide">
-            <View style={{ flex: 1, padding: 20, position: "relative" }}>
-                    <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>Add Clothing</Text>
+            <View style={{ flex: 1, padding: 60, paddingLeft: 60, position: "relative" }}>
+                    <Text style={{ fontSize: 25, fontWeight: "bold", marginBottom: 10 }}>Add Clothing</Text>
+                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Clothing Type: Top, Bottom, Accessory</Text>
+                    <TextInput
+                        style={[styles.input, { color: '#6d5e9c' }]}
+                        placeholder="Clothing Type"
+                        placeholderTextColor="#aaa"
+                        value={category}
+                        onChangeText={setCategory}
+                    />
+                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Colors</Text>
+                    <TextInput
+                        style={[styles.input, { color: '#6d5e9c' }]}
+                        placeholder="Colors (comma-separated)"
+                        placeholderTextColor="#aaa"
+                        value={colors}
+                        onChangeText={setColors}
+                    />                    
+                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Weather: Hot, Rainy, Normal, Cold</Text>
+                    <TextInput
+                        style={[styles.input, { color: '#6d5e9c' }]}
+                        placeholder="Weather (comma-separated)"
+                        placeholderTextColor="#aaa"
+                        value={weather}
+                        onChangeText={setWeather}
+                    />
+                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Formality: Casual or Formal</Text>
+                    <TextInput
+                        style={[styles.input, { color: '#6d5e9c' }]}
+                        placeholder="Formality (comma-separated)"
+                        placeholderTextColor="#aaa"
+                        value={formality}
+                        onChangeText={setFormality}
+                    />
 
-                    <TextInput style={styles.input} placeholder="Colors (comma-separated)" value={colors} onChangeText={setColors} />
-                    <TextInput style={styles.input} placeholder="Weather (comma-separated)" value={weather} onChangeText={setWeather} />
-                    <TextInput style={styles.input} placeholder="Image URL (Firebase Storage)" value={imageUrl} onChangeText={setImageUrl} />
+                    <Button title="Choose Image from Camera Roll" onPress={handlePickImage} />
+                    {image && (
+                    <Image
+                        source={{ uri: image }}
+                        style={{ width: 150, height: 150, marginTop: 10, borderRadius: 10 }}
+                    />
+                    )}
 
                     <Button title="Add Item" onPress={handleAddClothing} />
-                    <Button title="Close" onPress={() => setModalVisible(false)} />
+                    <Button title="Close" onPress={closeModal} />
                 </View>
             </Modal>
         </View>
@@ -143,7 +241,7 @@ const styles = StyleSheet.create({
     grid: { padding: 10, alignItems: 'center' },
     imageContainer: { margin: 10, borderRadius: 10, width: 150, height: 150, justifyContent: 'center', alignItems: 'center' },
     image: { width: 150, height: 150, borderRadius: 10 },
-    plusButton: { position: "absolute", top: 30, right: 20, backgroundColor: "white", borderRadius: 50, padding: 10, elevation: 5 },
+    plusButton: { position: "absolute", top: 30, right: 20, backgroundColor: '#E8DEFF', borderRadius: 50, padding: 10, elevation: 5 },
     input: { borderWidth: 1, borderColor: "#ccc", padding: 8, marginBottom: 10, borderRadius: 5, width: "80%" },
     modal: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white", padding: 20 }
 });
