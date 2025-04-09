@@ -3,6 +3,12 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-nativ
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 import { useRouter } from 'expo-router';
+import { LogBox } from 'react-native';
+
+// Hide specific warning
+LogBox.ignoreLogs([
+  'Function components cannot be given refs', // match exact message
+]);
 
 export default function Login() {
     const router = useRouter();
@@ -29,12 +35,14 @@ export default function Login() {
     };
     
     return (
-        <View style={styles.main_head}>   {/* title at top*/}
+        // title at the top 
+        <View style={styles.main_head}>   
             <View style={styles.header}>
                 <Text style={styles.headerText}>Fashion App</Text>
             </View>
 
-            <View style={styles.menu}>  {/*email and password square*/}
+            {/*email and password square*/}
+            <View style={styles.menu}>  
                 <Text style={styles.label}>Email</Text>
                 <TextInput
                     style={styles.input}
@@ -60,8 +68,8 @@ export default function Login() {
                 </TouchableOpacity>
 
                 {/* Forgot Password Link */}
-                <TouchableOpacity style={styles.forgotPassword}>
-                    <Text style={styles.forgotPassword}>Forgot password?</Text>
+                <TouchableOpacity style={{ alignItems: 'center', marginBottom: 8 }}>
+                <Text style={styles.forgotPassword}>Forgot password?</Text>
                 </TouchableOpacity>
 
                  {/* Sign Up Button */}
@@ -141,7 +149,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     forgotPassword: {
-        textAlign: 'center',
         color: '#555',
         textDecorationLine: 'underline',
         marginBottom: 8,

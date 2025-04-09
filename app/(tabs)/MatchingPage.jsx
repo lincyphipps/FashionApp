@@ -5,8 +5,6 @@ import { fetchAllClothing, generateMatches } from "../../firebase/firebaseServic
 import { getAuth } from 'firebase/auth';
 
 const MatchingPage = () => {
-  console.log("Matching Page Loaded");
-
   const [selectedClothing, setSelectedClothing] = useState({
     top: null,
     bottom: null,
@@ -21,14 +19,10 @@ const MatchingPage = () => {
   const [accessorySwitchOn, setAccessorySwitchOn] = useState(false);
 
   const handleToggle = async (category) => {
-    setCurrentCategory(category);
-    setModalVisible(true);
-
+    setModalVisible(true); // force modal open immediately to see if it’s working
     const auth = getAuth();
-    const user = auth.currentUser;
-    console.log("🔥 Full current user:", JSON.stringify(user, null, 2));    
-
-    const storage = getStorage();
+    const userId = auth.currentUser?.uid;
+    setCurrentCategory(category);
     
     const cleanUserId = auth.currentUser?.uid.trim();
     console.log("✅ Clean user ID:", cleanUserId);
@@ -37,10 +31,16 @@ const MatchingPage = () => {
 
     try {
       const firestoreCategory = category === "accessories" ? "accessory" : category;
-
       const items = await fetchClothingByCategory(userId, firestoreCategory);
-      const urls = items.map(item => item.imageUrl); // only grab image URLs
+      console.log("📦 Items fetched from Firestore:", items);
+
+      const urls = items.map(item => item.imageUrl);
+      console.log("🖼 Image URLs:", urls);
+      
+      console.log("📸 Setting modal visible with", urls.length, "images");
       setClothingImages(urls);
+      setCurrentCategory(category);
+      setModalVisible(true); 
     } catch (error) {
       console.error("Error fetching images:", error);
     }
@@ -81,20 +81,21 @@ const MatchingPage = () => {
             {`Select ${category.charAt(0).toUpperCase() + category.slice(1)}`}
           </Text>
 
-          {/* Disable accessories switch if top/bottom not selected */}
-          <Switch
-            onValueChange={(value) => {
-              if (category === "accessories") {
+          {category === "accessories" ? (
+            <Switch
+              onValueChange={(value) => {
                 setAccessorySwitchOn(value);
-                if (!value) {
-                  setSelectedClothing(prev => ({ ...prev, accessories: null }));
-                }
-              }
-              handleToggle(category);
-            }}
-            value={category === "accessories" ? accessorySwitchOn : !!selectedClothing[category]}
-            disabled={category === "accessories" && !canToggleAccessories}
-          />
+                if (value) handleToggle(category);
+                else setSelectedClothing(prev => ({ ...prev, accessories: null }));
+              }}
+              value={accessorySwitchOn}
+              disabled={!canToggleAccessories}
+            />
+          ) : (
+            <TouchableOpacity onPress={() => handleToggle(category)}>
+              <Text style={{ color: "blue", fontWeight: "bold" }}>Choose</Text>
+            </TouchableOpacity>
+          )}
         </View>
       ))}
 
@@ -137,11 +138,13 @@ const MatchingPage = () => {
       {/* Image Selection Modal */}
       <Modal visible={modalVisible} animationType="slide">
         <View style={{ flex: 1, padding: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold", marginTop: 30 }}>
             Select {currentCategory}:
           </Text>
+          <Text>Image count: {clothingImages.length}</Text>
           <FlatList
             data={clothingImages}
+            extraData={clothingImages}
             keyExtractor={(item, index) => index.toString()}
             numColumns={2}
             renderItem={({ item }) => (

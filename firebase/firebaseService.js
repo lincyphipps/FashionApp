@@ -15,13 +15,13 @@ export const addClothingItem = async (userId, clothingData) => {
 export const fetchClothingByCategory = async (userId, category) => {
   const clothingRef = collection(db, `users/${userId}/clothing`);
   const q = query(clothingRef, where("category", "==", category));
-  
   try {
     const querySnapshot = await getDocs(q);
     const clothingItems = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+    console.log("📦 MatchingPage fetched items:", clothingItems);
     return clothingItems;
   } catch (error) {
     console.error("Error fetching clothing:", error);
