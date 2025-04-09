@@ -14,6 +14,7 @@ const MatchingPage = () => {
   });
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [outfitModalVisible, setOutfitModalVisible] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
   const [clothingImages, setClothingImages] = useState([]);
   const [matchedResults, setMatchedResults] = useState([]);
@@ -23,11 +24,11 @@ const MatchingPage = () => {
     setCurrentCategory(category);
     setModalVisible(true);
 
+    const auth = getAuth();
     const user = auth.currentUser;
     console.log("🔥 Full current user:", JSON.stringify(user, null, 2));    
 
     const storage = getStorage();
-    const auth = getAuth();
     
     const cleanUserId = auth.currentUser?.uid.trim();
     console.log("✅ Clean user ID:", cleanUserId);
@@ -35,8 +36,10 @@ const MatchingPage = () => {
     console.log("🗂 Firebase path:", `users/${cleanUserId}/clothing/${itemId}.jpg`);
 
     try {
-      const result = await listAll(storageRef);
-      const urls = await Promise.all(result.items.map((item) => getDownloadURL(item)));
+      const firestoreCategory = category === "accessories" ? "accessory" : category;
+
+      const items = await fetchClothingByCategory(userId, firestoreCategory);
+      const urls = items.map(item => item.imageUrl); // only grab image URLs
       setClothingImages(urls);
     } catch (error) {
       console.error("Error fetching images:", error);
@@ -51,6 +54,7 @@ const MatchingPage = () => {
     const matches = generateMatches(allClothing, selectedClothing, accessorySwitchOn);
   
     setMatchedResults(matches); // display in UI
+    setOutfitModalVisible(true);
   };  
 
   const selectImage = (imageUrl) => {
@@ -149,6 +153,27 @@ const MatchingPage = () => {
           <Button title="Cancel" onPress={() => setModalVisible(false)} />
         </View>
       </Modal>
+
+      <Modal visible={outfitModalVisible} animationType="slide" transparent={false}>
+        <View style={{ flex: 1, padding: 30, backgroundColor: "#FFF" }}>
+          <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20, textAlign: "center" }}>
+            Your Matched Outfit
+          </Text>
+          
+          {selectedClothing.top && (
+            <Image source={{ uri: selectedClothing.top }} style={{ width: 120, height: 120, alignSelf: "center", marginBottom: 15 }} />
+          )}
+          {selectedClothing.bottom && (
+            <Image source={{ uri: selectedClothing.bottom }} style={{ width: 120, height: 120, alignSelf: "center", marginBottom: 15 }} />
+          )}
+          {accessorySwitchOn && selectedClothing.accessories && (
+            <Image source={{ uri: selectedClothing.accessories }} style={{ width: 120, height: 120, alignSelf: "center", marginBottom: 15 }} />
+          )}
+
+          <Button title="Close" onPress={() => setOutfitModalVisible(false)} />
+        </View>
+      </Modal>
+
     </View>
   );
 };

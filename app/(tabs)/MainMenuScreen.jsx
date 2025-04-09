@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function MyScreen() {
     return(
@@ -14,12 +15,16 @@ export default function MyScreen() {
             <Icon     //login icon
                 onPress={() => alert("meow")}
                 style={[styles.iconContainer, {left: 310},{top:75}]}
+                name="log-in-outline"
+                iconType="Ionicons"
             /> 
             
-           
+        
             <Icon     //settings
                 onPress={() => alert("settings")}
                 style={[styles.iconContainer, {left: 30},{top:75}]}
+                name="gear"
+                iconType="FontAwesome"
             /> 
 
             <Rectangle 
@@ -98,19 +103,28 @@ const Rectangle = ({text, onPress, style}) => {
     }
 
 } 
-const Icon = ({onPress, style}) => {
-    if(onPress){
-        return(
-        <TouchableOpacity 
-            style={[styles.iconContainer, style]} 
-            onPress={onPress}
-        >
-            <FontAwesome name="gear" size={40} color="#6d5e9c" />
-            <FontAwesome icon="fa-solid fa-circle-user" />
-        </TouchableOpacity>
-        );
+const Icon = ({ onPress, style, name, iconType }) => {
+    let IconComponent;
+  
+    // Determine which icon library to use
+    switch (iconType) {
+      case 'Ionicons':
+        IconComponent = Ionicons;
+        break;
+      case 'FontAwesome':
+        IconComponent = FontAwesome;
+        break;
+      default:
+        return null;
     }
-} 
+  
+    return (
+      <TouchableOpacity style={[styles.iconContainer, style]} onPress={onPress}>
+        <IconComponent name={name} size={40} color="#6d5e9c" />
+      </TouchableOpacity>
+    );
+  };
+  
 
 // const shapestyles = StyleSheet.create({
     
