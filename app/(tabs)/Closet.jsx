@@ -26,16 +26,14 @@ const Closet = () => {
     // 🔹 Fetch Clothing when screen loads or category changes
     useEffect(() => {
         const loadClothing = async () => {
-            if (!userId) return;
-          
+            if (!userId) return;  
             const selectedCategory = categoryKeys[selectedTab];
-            let items = [];
-
+            console.log("🔥 fetchClothingByCategory called with:", userId, selectedCategory);
             items = await fetchClothingByCategory(userId, selectedCategory);
             setClothing(items || []);
           };          
         loadClothing();
-    }, [selectedTab]); // Refetch when category changes
+    }, [userId, selectedTab]); // Refetch when category changes
 
     // 🔹 Add Clothing Item
     const handleAddClothing = async () => {         
@@ -109,6 +107,7 @@ const Closet = () => {
     // 🔹 Fetch updated clothing after adding new item
     const fetchUpdatedClothing = async () => {
         const items = await fetchClothingByCategory(userId, category);
+        console.log("🔥 fetchClothingByCategory called with:", userId, category);
         setClothing(items);
     };
 
