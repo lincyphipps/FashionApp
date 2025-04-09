@@ -4,13 +4,15 @@ import { addClothingItem, fetchClothingByCategory, deleteClothingItem } from "..
 import { getAuth } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
+import { getDownloadURL } from "firebase/storage";
 //import { uploadClothingImage } from '../../firebase/storage';
 
 const Closet = () => {
     const auth = getAuth();
     const userId = auth.currentUser ? auth.currentUser.uid : null; // Get logged-in user ID
 
-    const tabs = ['Recents', 'Tops', 'Bottoms', 'Accessories'];
+    const tabs = ['Tops', 'Bottoms', 'Accessories'];
+    const categoryKeys = ['top', 'bottom', 'accessory'];
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [category, setCategory] = useState("");
@@ -26,18 +28,14 @@ const Closet = () => {
         const loadClothing = async () => {
             if (!userId) return;
           
+            const selectedCategory = categoryKeys[selectedTab];
             let items = [];
-            if (category) {
-              items = await fetchClothingByCategory(userId, category);
-            } else {
-              items = await fetchClothingByCategory(userId, "top"); // or call fetchAllClothing
-            }
-          
-            console.log("Fetched clothing:", items);
+
+            items = await fetchClothingByCategory(userId, selectedCategory);
             setClothing(items || []);
           };          
         loadClothing();
-    }, [category]); // Refetch when category changes
+    }, [selectedTab]); // Refetch when category changes
 
     // 🔹 Add Clothing Item
     const handleAddClothing = async () => {         
@@ -115,16 +113,19 @@ const Closet = () => {
     };
 
     // 🔹 Delete Clothing
-    const handleDeleteClothing = (clothingId) => {
-        deleteClothingItem(userId, clothingId);
-        setClothing(clothing.filter(item => item.id !== clothingId)); // Update UI
-    };
+    const handleDeleteClothing = async (clothingId) => {
+        await deleteClothingItem(userId, clothingId);
+        console.log("Clothing item deleted:", clothingId);
+      
+        const selectedCategory = categoryKeys[selectedTab];
+        const updated = await fetchClothingByCategory(userId, selectedCategory);
+        setClothing(updated);
+      };      
 
     // Render clothing items (use imageUrl from Firebase)
     const renderItem = ({ item }) => (
         <View style={styles.imageContainer}>
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
-            <Text>{item.category.toUpperCase()}</Text>
             <TouchableOpacity onPress={() => handleDeleteClothing(item.id)} style={styles.deleteButton}>
                 <Ionicons name="trash-outline" size={20} color="red" />
             </TouchableOpacity>
