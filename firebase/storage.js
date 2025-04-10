@@ -1,4 +1,5 @@
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getApp } from "firebase/app";
 
 const storage = getStorage();
 /*
@@ -10,15 +11,10 @@ export const uploadClothingImage = async (uri, userId, itemId) => {
     const response = await fetch(uri);
     const blob = await response.blob();
 
+    const storage = getStorage(getApp());
     const imageRef = ref(storage, `users/${userId}/clothing/${itemId}.jpg`);
+    await uploadBytes(imageRef, blob);
     console.log("🗂 Firebase path:", imageRef.fullPath);
-
-    const metadata = {
-      contentType: 'image/jpeg',
-    };
-
-    //await uploadBytes(imageRef, blob, metadata);
-    //console.log("✅ Upload complete");
 
     const downloadURL = await getDownloadURL(imageRef);
     console.log("✅ Uploaded Image URL:", downloadURL);

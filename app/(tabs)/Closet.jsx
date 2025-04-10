@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL } from "firebase/storage";
-//import { uploadClothingImage } from '../../firebase/storage';
+import { uploadClothingImage } from '../../firebase/storage';
 
 const Closet = () => {
     const auth = getAuth();
@@ -46,6 +46,7 @@ const Closet = () => {
         console.log("🆔 Generated temp ID:", tempId);
       
         const imageUrl = image;
+
         console.log("📸 Uploading image URL:", imageUrl);
         if (!imageUrl) {
           Alert.alert("Error", "Failed to upload image.");
