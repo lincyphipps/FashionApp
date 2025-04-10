@@ -2,8 +2,23 @@ import React from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { signOut, getAuth } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MyScreen() {
+    const navigation = useNavigation();
+
+    const handleSignOut = async () => {
+        try {
+          await signOut(getAuth());
+          await AsyncStorage.removeItem('currentUser');
+          navigation.replace('Login'); // replace with your login screen route
+        } catch (error) {
+          alert('Failed to log out');
+        }
+      };
+
     return(
         <View style={styles.PageContainer}>
             <View 
@@ -12,14 +27,13 @@ export default function MyScreen() {
                 
             </View>
 
-            <Icon     //login icon
-                onPress={() => alert("meow")}
-                style={[styles.iconContainer, {left: 310},{top:75}]}
+            <Icon 
+                onPress={handleSignOut}
+                style={[styles.iconContainer, { left: 310 }, { top: 75 }]}
                 name="log-in-outline"
                 iconType="Ionicons"
-            /> 
+            />
             
-        
             <Icon     //settings
                 onPress={() => alert("settings")}
                 style={[styles.iconContainer, {left: 30},{top:75}]}
@@ -29,17 +43,17 @@ export default function MyScreen() {
 
             <Rectangle 
                 text="Upload Photos" 
-                onPress={() => alert("To Closet!")}
+                onPress={() => navigation.navigate('Closet')} 
                 style = {{top: 360}}
             />
 
             <Rectangle text="Open Closet" 
-                onPress={() => alert("To Closet!")}
+                onPress={() => navigation.navigate('Closet')} 
                 style = {{top: 460}}
             />
 
             <Rectangle text="Matching" 
-                onPress={() => alert("To Closet!")}
+                onPress={() => navigation.navigate('MatchingPage')} 
                 style = {{top: 560}}
             />
         </View>
