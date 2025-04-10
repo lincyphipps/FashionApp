@@ -38,7 +38,7 @@ export default function Login() {
         // title at the top 
         <View style={styles.main_head}>   
             <View style={styles.header}>
-                <Text style={styles.headerText}>Fashion App</Text>
+                <Text style={styles.headerText}>FashionApp</Text>
             </View>
 
             {/*email and password square*/}

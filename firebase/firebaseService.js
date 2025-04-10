@@ -1,6 +1,31 @@
 import { db } from "./firebaseConfig";
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 
+export const getMatchScore = (item1, item2) => {
+  let score = 0;
+
+  // Check formality
+  if (item1.formality && item2.formality && item1.formality === item2.formality) {
+    score += 1;
+  }
+
+  // Check for at least one shared weather type
+  if (
+    Array.isArray(item1.weather) &&
+    Array.isArray(item2.weather) &&
+    item1.weather.some(w => item2.weather.includes(w))
+  ) {
+    score += 1;
+  }
+
+  // Check if main colors match
+  if (item1.colors?.[0] && item2.colors?.[0] && item1.colors[0] === item2.colors[0]) {
+    score += 1;
+  }
+
+  return score;
+};
+
 // 🔹 Function to add a clothing item
 export const addClothingItem = async (userId, clothingData) => {
   try {
@@ -28,7 +53,7 @@ export const fetchClothingByCategory = async (userId, category) => {
   }
 };
 
-const fetchAllClothing = async (userId) => {
+export const fetchAllClothing = async (userId) => {
   const categories = ["top", "bottom", "accessory"];
   const allItems = [];
 
@@ -72,42 +97,45 @@ export const getMatchingOutfits = async (userId, preferences = {}) => {
   }
 };
 
-const generateMatches = (items, selected, accessoryMode = false) => {
+export const generateMatches = (items, selected, accessoryMode = false) => {
   const { top, bottom } = selected;
   const matches = [];
+
+  const getMatchScore = (itemA, itemBImageUri) => {
+    const itemB = items.find((i) => i.imageUrl === itemBImageUri);
+    if (!itemA || !itemB) return 0;
+
+    let score = 0;
+    if (itemA.formality === itemB.formality) score++;
+    if (itemA.colors?.some(color => itemB.colors?.includes(color))) score++;
+    if (itemA.weather?.some(w => itemB.weather?.includes(w))) score++;
+
+    return score;
+  };
 
   if (accessoryMode && top && bottom) {
     for (const item of items) {
       if (item.category === "accessory") {
         const score = getMatchScore(item, top) + getMatchScore(item, bottom);
-        if (score >= 2) {
-          matches.push({ item, score });
-        }
+        if (score >= 2) matches.push({ item, score });
       }
     }
   } else if (top && !bottom) {
     for (const item of items) {
       if (item.category === "bottom") {
         const score = getMatchScore(item, top);
-        if (score >= 2) {
-          matches.push({ item, score });
-        }
+        if (score >= 2) matches.push({ item, score });
       }
     }
   } else if (bottom && !top) {
     for (const item of items) {
       if (item.category === "top") {
         const score = getMatchScore(item, bottom);
-        if (score >= 2) {
-          matches.push({ item, score });
-        }
+        if (score >= 2) matches.push({ item, score });
       }
     }
   }
 
-  // Sort by best score
   matches.sort((a, b) => b.score - a.score);
-
-  // Return just the clothing items
-  return matches.map(match => match.item);
+  return matches.map(m => m.item);
 };
