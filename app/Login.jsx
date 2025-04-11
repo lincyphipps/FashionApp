@@ -9,6 +9,9 @@ import { LogBox } from 'react-native';
 LogBox.ignoreLogs([
   'Function components cannot be given refs', // match exact message
 ]);
+LogBox.ignoreLogs([
+    'Login error: auth/invalid-credential Firebase: Error (auth/invalid-credential)', // match exact message
+]);
 
 export default function Login() {
     const router = useRouter();
@@ -25,7 +28,7 @@ export default function Login() {
           router.replace('/(tabs)/MainMenuScreen');
         } catch (error) {
           console.error('Login error:', error.code, error.message);
-          alert('Login failed: ' + error.message);
+          alert('Login failed: Invalid credentials');
           setErrorMsg(error.message);
         }
       };          
