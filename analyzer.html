@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Analyzer Service</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/3.18.0/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow-models/2.0.0/mobilenet/mobilenet.min.js"></script>
+</head>
+<body>
+    <h1>Image Analysis API</h1>
+    <div id="result"></div>
+
+    <script>
+        // Path to your model (update with your actual GitHub Pages URL)
+        const MODEL_URL = 'https://lincyphipps.github.io/FashionApp/model.json';
+        let model = null;
+
+        // Initialize the model
+        async function loadModel() {
+            try {
+                model = await tf.loadLayersModel(MODEL_URL);
+                document.getElementById('result').innerText = 'Model loaded successfully';
+                console.log('Model loaded');
+            } catch (error) {
+                document.getElementById('result').innerText = 'Error loading model: ' + error;
+                console.error('Error loading model:', error);
+            }
+        }
+
+        // Process image and return prediction
+        async function analyzeImage(imageData) {
+            try {
+                // Decode base64 image
+                const imageBuffer = tf.util.encodeString(imageData, 'base64').buffer;
+                const image = await tf.browser.fromPixels(
+                    new ImageData(new Uint8ClampedArray(imageBuffer), width, height)
+                );
+                
+                // Preprocess image for the model
+                const processedImg = tf.image.resizeBilinear(image, [224, 224])
+                    .expandDims(0)
+                    .toFloat()
+                    .div(tf.scalar(255));
+                
+                // Make prediction
+                const prediction = await model.predict(processedImg);
+                const results = await prediction.data();
+                
+                // Cleanup tensors
+                image.dispose();
+                processedImg.dispose();
+                prediction.dispose();
+                
+                return results;
+            } catch (error) {
+                console.error('Error analyzing image:', error);
+                return { error: error.message };
+            }
+        }
+
+        // Set up API endpoint
+        window.addEventListener('message', async function(event) {
+            if (event.data.type === 'analyzeImage') {
+                const results = await analyzeImage(event.data.imageData);
+                event.source.postMessage({
+                    type: 'analysisResult',
+                    results: results
+                }, '*');
+            }
+        });
+
+        // Load model on page load
+        loadModel();
+    </script>
+</body>
+</html>
