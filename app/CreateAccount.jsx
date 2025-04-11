@@ -3,6 +3,12 @@ import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+import { LogBox } from 'react-native';
+
+// Hide specific warning
+LogBox.ignoreLogs([
+  'Function components cannot be given refs', // match exact message
+]);
 
 const CreateAccount = () => {
     const [email, setEmail] = useState('');
@@ -39,7 +45,8 @@ const CreateAccount = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.menu}>  {/*email and password square*/}
+          {/*email and password square*/}
+            <View style={styles.menu}>  
                 <Text style={styles.title}>Create Account</Text>
 
                 {/* Registration Form */}
