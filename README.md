@@ -12,9 +12,9 @@ FashionApp is a beginner-friendly mobile app built with React Native and Firebas
 - 🔐 Secure user authentication (handled via Firebase)
 
 ## 🛠️ Tech Stack
-- **Frontend:** React Native, Expo
+- **Frontend:** React Native, Expo 
 - **Backend:** Firebase (Firestore, Authentication, Storage)
-- **AI Integration:** Teachable Machine (or similar) for color detection
+- **AI Integration:** Teachable Machine for color detection
 - **Matching Algorithm:** Custom logic based on clothing attributes
 - **Version Control:** Git & GitHub
 
